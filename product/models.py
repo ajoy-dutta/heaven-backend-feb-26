@@ -16,35 +16,22 @@ class ProductCategory(models.Model):
 
 
 class Product(models.Model):
-    company = models.ForeignKey("master.Company", on_delete=models.CASCADE, related_name='products')
-    category = models.ForeignKey("ProductCategory", on_delete=models.CASCADE, related_name='products')
+    company = models.CharField(max_length=100, blank=True, null= True)
+    category = models.ForeignKey("ProductCategory", on_delete=models.CASCADE, related_name='products', blank=True, null = True)
     product_name = models.CharField(max_length=100)  
     part_no = models.CharField(max_length=100)
-    product_code = models.CharField(max_length=100, blank=True, null=True)
-    hs_code = models.CharField(max_length=100, blank=True, null=True)
     image = models.ImageField(upload_to='product_images/', blank=True, null=True)
     brand_name = models.CharField(max_length=100, blank=True, null=True) 
     model_no = models.CharField(max_length=100, blank=True, null=True)
     bike_model = models.ForeignKey("product.BikeModel", on_delete=models.SET_NULL, blank=True,null=True,related_name="products") 
-    net_weight = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     product_mrp = models.DecimalField(max_digits=12, decimal_places=3, default=0)
-    percentage = models.DecimalField(max_digits=12, decimal_places=3, default=0)
-    product_bdt = models.DecimalField(max_digits=12, decimal_places=3, default=0)
+    unit = models.CharField(max_length=20, blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     remarks = models.TextField(blank=True,null=True)
     
-    def save(self, *args, **kwargs):
-        if not self.product_code:
-            last_product = Product.objects.order_by('-id').first()
-            if last_product and last_product.product_code and last_product.product_code.startswith("PROD"):
-                last_number = int(last_product.product_code.replace("PROD", ""))
-            else:
-                last_number = 0
-            self.product_code = f"PROD{last_number + 1:03d}"
-        super().save(*args, **kwargs)
-        
+   
     def __str__(self):
-        return f"{self.company.company_name} - {self.category.category_name} - {self.product_name}"
+        return f"{self.company}  - {self.product_name} - {self.part_no}"
     
 
 

@@ -32,7 +32,6 @@ class BikeModelSerializer(serializers.ModelSerializer):
 # ----------------------------
 class ProductSerializer(serializers.ModelSerializer):
     category_detail = ProductCategorySerializer(source='category', read_only=True)
-    company_detail = CompanySerializer(source='company', read_only=True)
     bike_model_detail = BikeModelSerializer(source="bike_model", read_only=True)
 
     class Meta:

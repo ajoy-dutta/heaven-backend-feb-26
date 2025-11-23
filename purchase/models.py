@@ -130,7 +130,7 @@ class OrderItem(models.Model):
 
 
 class Purchase(models.Model):
-    invoice_no = models.CharField(max_length=100, unique=True)
+    invoice_no = models.CharField(max_length=100)
     purchase_date = models.DateField()
     exporter_name = models.CharField(max_length=255)
     company_name = models.CharField(max_length=255)

@@ -4,13 +4,11 @@ from .serializers import*
 
 
 
-
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
 
     
-
 class CostCategoryViewSet(viewsets.ModelViewSet):
     queryset = CostCategory.objects.all()
     serializer_class = CostCategorySerializer
@@ -30,7 +28,6 @@ class PaymentModeViewSet(viewsets.ModelViewSet):
 class DivisionMasterViewSet(viewsets.ModelViewSet):
     queryset = DivisionMaster.objects.all()
     serializer_class = DivisionMasterSerializer
-
 
 
 class DistrictMasterViewSet(viewsets.ModelViewSet):

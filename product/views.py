@@ -40,48 +40,39 @@ class BikeModelViewSet(viewsets.ModelViewSet):
 # Product
 # ----------------------------
 class ProductViewSet(viewsets.ModelViewSet):
-    """
-    Useful query params:
-      - ?company=<id>
-      - ?category=<id>
-      - ?bike_model=<id>
-      - ?model_no=Glamour          (legacy text filter)
-      - ?search=clutch             (name/part/brand search)
-    """
-    queryset = (
-        Product.objects
-        .select_related('company', 'category', 'bike_model')
-        .all()
-    )
+    queryset = Product.objects.select_related('category', 'bike_model').all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    # broad but practical search fields for admin + shop
+
     search_fields = [
         'product_name',
         'part_no',
         'brand_name',
         'model_no',
-        'description',
     ]
+
     filterset_fields = ['company', 'category', 'bike_model', 'model_no']
 
     def get_queryset(self):
         qs = super().get_queryset()
 
-        # extra explicit filters (helpful when not using filterset on FE)
+        # Filter by company (CharField)
         company = self.request.query_params.get('company')
         if company:
-            qs = qs.filter(company_id=company)
+            qs = qs.filter(company=company)
 
+        # Filter by bike_model (FK)
         bike_model = self.request.query_params.get('bike_model')
         if bike_model:
             qs = qs.filter(bike_model_id=bike_model)
 
+        # Filter by model no
         model_no = self.request.query_params.get('model_no')
         if model_no:
             qs = qs.filter(model_no__iexact=model_no)
 
+        # Filter by brand name
         brand_name = self.request.query_params.get('brand_name')
         if brand_name:
             qs = qs.filter(brand_name__iexact=brand_name)

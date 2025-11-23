@@ -63,7 +63,6 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 
 
-
 def create_purchase_entry(data):
     try:
         company = Company.objects.get(id=data["company_id"])
@@ -118,7 +117,6 @@ def update_stock(product, company_name, quantity, price, unit):
     )
 
     
-
     if not created:
         stock.purchase_quantity += quantity
         stock.current_stock_quantity += quantity
@@ -139,10 +137,10 @@ class UploadStockExcelView(APIView):
         purchase_date = request.data.get("purchase_date")
 
         # Validate company
-        try:
-            company = Company.objects.get(id=company_id)
-        except Company.DoesNotExist:
-            return Response({"error": "No Company Selected or Found"}, status=400)
+        # try:
+        #     company = Company.objects.get(id=company_id)
+        # except Company.DoesNotExist:
+        #     return Response({"error": "No Company Selected or Found"}, status=400)
 
         # Validate file
         if not file:
@@ -160,24 +158,33 @@ class UploadStockExcelView(APIView):
         created_stocks = []
         with transaction.atomic():
             for _, row in df.iterrows():
+                product_name = str(row["Description"]).strip()
                 part_no = str(row["Part_no"]).strip()
+                company_name = str(row["Group"]).strip()
                 price = float(row["Rate"])
                 quantity = int(row["Qty"])
                 unit = str(row["Unit"])
 
-                print("Processing:", part_no, price, quantity, unit)
+                print("Processing:", part_no, price, quantity, unit, company_name)
 
-                try:
-                    product = Product.objects.get(part_no=part_no)
-                except Product.DoesNotExist:
-                    continue
+                product, created = Product.objects.get_or_create(
+                    part_no=part_no,
+                    defaults={
+                        "company": company_name,
+                        "category": None, 
+                        "product_name": product_name,
+                        "product_mrp": price,
+                        'unit' : unit,
+                    }
+                )
 
                 # Update product MRP
-                product.product_mrp = price
-                product.save()
+                if not created:
+                    product.product_mrp = price
+                    product.save()
 
                 # Update stock using the helper function
-                update_stock(product, company.company_name, quantity, price, unit)
+                update_stock(product, company_name, quantity, price, unit)
 
                 # Create purchase entry
                 create_purchase_entry({
